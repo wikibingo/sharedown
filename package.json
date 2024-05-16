@@ -1,0 +1,72 @@
+{
+  "name": "sharedown",
+  "author": "kylon",
+  "repository": "https://github.com/kylon/Sharedown",
+  "homepage": "https://github.com/kylon/Sharedown",
+  "license": "GPL-3.0-or-later",
+  "version": "5.3.4",
+  "description": "Electron application to save your Sharepoint videos for offline usage (especially meant for students)",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"this app has no tests\" && exit 1",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.electron.sharedown",
+    "copyright": "Copyright © 2023 kylon",
+    "beforePack": "buildHooks/beforePack.js",
+    "afterAllArtifactBuild": "buildHooks/afterAllArtifactBuild.js",
+    "mac": {
+      "category": "public.app-category.video",
+      "target": {
+        "target": "dmg",
+        "arch": ["arm64", "x64"]
+      }
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "linux": {
+      "category": "AudioVideo",
+      "target": "AppImage"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "build/wicon.ico",
+      "uninstallerIcon": "build/wicon.ico"
+    },
+    "portable": {
+      "artifactName": "${productName} ${version} portable.exe"
+    },
+    "appImage": {
+      "license": "LICENSE"
+    }
+  },
+  "keywords": [],
+  "devDependencies": {
+    "electron": "^30.0.1",
+    "electron-builder": "^25.0.0-alpha.6"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "6.5.2",
+    "axios": "^1.6.8",
+    "bootstrap": "5.3.3",
+    "clipboardy": "2.3.0",
+    "fessonia": "^2.2.2",
+    "iso8601-duration": "^2.1.2",
+    "keytar": "^7.9.0",
+    "puppeteer": "22.7.0"
+  }
+}

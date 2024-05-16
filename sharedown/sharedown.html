@@ -1,0 +1,439 @@
+<!--
+  This file is part of the Sharedown (https://github.com/kylon/Sharedown).
+  Copyright (c) 2021 Kylon.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, version 3.
+
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+  General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharedown</title>
+
+    <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="sharedown.css">
+</head>
+<body class="h-100 overflow-hidden">
+    <div class="container-fluid h-100">
+        <div id="sharedownhead" class="row bg-sharepoint2 p-4 pt-2 position-fixed w-100">
+            <div class="bg-head-gradient-layer-anim"></div>
+            <div class="bg-head-anim"></div>
+            <div class="bg-head-anim bg-head-anim1"></div>
+            <div class="bg-head-anim bg-head-anim2"></div>
+
+            <div class="col-12 mb-4 text-center">
+                <div class="position-relative d-inline-block">
+                    <img class="img-fluid" src="img/headlogo.png">
+                    <img class="img-fluid position-absolute logo-top-arrow flip-v-left a-delay-05s a-duration-15s" src="img/darrow.png">
+                    <img class="img-fluid position-absolute logo-center-arrow flip-v-right a-delay-1s a-duration-15s" src="img/darrow.png">
+                    <img class="img-fluid position-absolute logo-bottom-arrow flip-v-left a-delay-15s a-duration-15s" src="img/darrow.png">
+                </div>
+            </div>
+
+            <div class="col-12 text-center">
+                <button type="button" class="btn btn-warning text-lightblack" title="Add Sharepoint link to download queue" data-bs-toggle="modal" data-bs-target="#urlsaddmodal">
+                    <i class="fa-solid fa-plus"></i> Add Sharepoint video URLs
+                </button>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end pt-4">
+                <div class="btn-group">
+                    <a id="open-gsett" href="#" class="btn btn-light" aria-current="page" data-bs-toggle="modal" data-bs-target="#sharedownsett"><i class="fa-solid fa-gear"></i> Settings</a>
+                    <a id="stop-dwnl" href="#" class="btn btn-light btn-disabled" aria-current="page"><i class="fa-solid fa-stop"></i> Stop download</a>
+                    <a id="start-dwnl" href="#" class="btn btn-light"><i class="fa-solid fa-download"></i> Start download</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row shinfo position-fixed w-100">
+            <div class="col-12 fst-italic text-lightgrey p-2">
+                <p class="mb-0">(<span id="quelen">0</span>) Download queue - (<span id="completec">0</span>) Complete</p>
+            </div>
+        </div>
+
+        <div id="dque" class="downloadque row pb-3"></div>
+    </div>
+
+    <!-- import video urls modal -->
+    <div id="urlsaddmodal" class="modal fade" tabindex="-1" aria-labelledby="urlsaddmodal" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Sharepoint URLs to download queue</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="h-100">
+                        <textarea class="form-control h-100 text-nowrap" id="vurlslist" placeholder="Paste URLs here, one URL per line"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer d-inline-block">
+                    <div class="row">
+                        <div class="col-6">
+                            <button id="importfromfold" type="button" class="btn bg-sharepoint1" data-bs-toggle="modal" data-bs-target="#foldimportmodal">Import from folder</button>
+                        </div>
+                        <div class="col-6 text-end">
+                            <button id="clearimporturlsbtn" type="button" class="btn bg-sharepoint1">Clear</button>
+                            <button id="importurlsbtn" type="button" class="btn bg-sharepoint1">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- import video urls from folder modal -->
+    <div id="foldimportmodal" class="modal fade" tabindex="-1" aria-labelledby="foldimportmodal" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Import URLs from folder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="h-100">
+                        <textarea class="form-control h-100 text-nowrap" id="furlslist" placeholder="Paste folder URLs here, one URL per line"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer d-inline-block">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="importfoldsubfolds">
+                                <label class="form-check-label" for="importfoldsubfolds">Include subfolders</label>
+                              </div>
+                        </div>
+                        <div class="col-4">
+                            <select id="importfoldurlssort" class="form-select form-select-sm" aria-label="folder urls sorting">
+                                <option value="0" selected>Do not sort URLs in folders</option>
+                                <option value="1">Sort by time created</option>
+                                <option value="2">Sort by last modified</option>
+                                <option value="3">Sort alphabetically</option>
+                              </select>
+                        </div>
+                        <div class="col-4 text-end">
+                            <button id="clearimportfoldurlsbtn" type="button" class="btn bg-sharepoint1">Clear</button>
+                            <button id="importfoldurlsbtn" type="button" class="btn bg-sharepoint1">Import</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- video settings modal -->
+    <div id="videosett" class="modal fade" tabindex="-1" aria-labelledby="videosett" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Video settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="saveas" class="form-label">Save file as</label>
+                                <input id="saveas" type="text" class="form-control" placeholder="file name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="voutdirp" class="form-label">Output directory</label>
+                            <div class="input-group mb-3">
+                                <button class="btn btn-outline-secondary" type="button" id="voutdirinp">Select folder</button>
+                                <input id="voutdirp" type="text" class="form-control outpath" aria-label="Video output directory" placeholder="Downloads/sharedownVideos">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <span id="save-succ-str" class="text-success d-none"><i class="fa-solid fa-check"></i> Saved</span>
+                    <button id="save-sett" type="button" class="btn bg-sharepoint1" data-video-id="">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- global settings modal -->
+    <div id="sharedownsett" class="modal fade" tabindex="-1" aria-labelledby="sharedownsett" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sharedown settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="downlrun-setalr" class="row mb-3 d-none">
+                        <div class="col-12 text-center">
+                            <i class="text-darkyellow">A download has started!<br>Settings will be applied on next download.</i>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="soutdirp" class="form-label">Output directory</label>
+                            <div class="input-group mb-3">
+                                <button class="btn btn-outline-dark" type="button" id="soutdirinp">Select folder</button>
+                                <input id="soutdirp" type="text" class="form-control outpath" aria-label="Sharedown output directory">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Downloader</label>
+                                <select id="shddownloader" class="form-select" aria-label="Downloader">
+                                    <option value="ffmpeg">FFmpeg (Slow/Stable)</option>
+                                    <option selected value="yt-dlp">YT-dlp (Fast)</option>
+                                    <option value="direct">Direct (Fastest)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3 downldr-opt yt-dlp-opt d-none">
+                        <div class="col-12">
+                            <label for="ytdlptmpdp" class="form-label">Fragments temp directory</label>
+                            <div class="input-group mb-3">
+                                <button class="btn btn-outline-dark" type="button" id="ytdlptmpdir">Select folder</button>
+                                <input id="ytdlptmpdp" type="text" class="form-control outpath" aria-label="YT-dlp temp output directory" placeholder="Output directory">
+                                <div id="ytdlptmphelp" class="form-text">Set the temp directory for fragments download. (default: output directory)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3 downldr-opt yt-dlp-opt d-none">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="keeptmponfail">
+                                <label class="form-check-label" for="keeptmponfail">Do not delete temp directory on fail</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3 downldr-opt yt-dlp-opt d-none">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Parallel fragment downloads</label>
+                                <input id="ytdlpn" type="number" class="form-control" aria-describedby="ytdlpnhelp" placeholder="5 (default)" min="1" max="5">
+                                <div id="ytdlpnhelp" class="form-text">Lower this value to avoid network throttle (min 1, max 5)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3 downldr-opt yt-dlp-opt d-none">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Download rate limit</label>
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <div class="form-check form-check-inline">
+                                            <input name="ratelimunitradio" id="mbunitlim" checked class="form-check-input" type="radio" value="m" aria-label="Radio button to set rate limit in megabyte for following rate limit input">
+                                            <label class="form-check-label" for="mbunitlim">Mb</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input name="ratelimunitradio" id="kbunitlim" class="form-check-input" type="radio" value="k" aria-label="Radio button to set rate limit in kilobyte for following rate limit input">
+                                            <label class="form-check-label" for="kbunitlim">Kb</label>
+                                        </div>
+                                    </div>
+                                    <input id="ytdlprl" type="number" class="form-control" aria-label="Download rate limit input with radio button" placeholder="0 (default, unlimited)" min="0">
+                                </div>
+                                <div id="ytdlprlhelp" class="form-text">Exact value may not be respected, try lower if it is the case</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3 downldr-opt direct-opt d-none">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Parallel fragment downloads</label>
+                                <input id="directn" type="number" class="form-control" aria-describedby="directnhelp" placeholder="5 (default)" min="1" max="5">
+                                <div id="directnhelp" class="form-text">Lower this value to avoid network throttle (min 1, max 5)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Browser timeout (seconds)</label>
+                                <input id="ppttmout" type="number" class="form-control" aria-describedby="ppttmouthelp" placeholder="30 (default)" min="0">
+                                <div id="ppttmouthelp" class="form-text">Set this to 0 to disable the timeout</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="cuschromep" class="form-label">Custom Chrome/Chromium executable</label>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <button class="btn btn-outline-dark" type="button" id="cuschromepb">Select executable</button>
+                                    <input id="cuschromep" type="text" class="form-control binpath" aria-label="Custom Chrome/Chromium executable" placeholder="Built-in Chromium">
+                                </div>
+                                <div id="cuschromephelp" class="form-text">Override built-in Chromium with an external Chrome executable</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Sharedown Logs</label>
+                                <select id="shlogs" class="form-select" aria-label="Logging">
+                                    <option value="1">Enable</option>
+                                    <option selected value="0">Disable</option>
+                                </select>
+                                <div id="shlogshelp" class="form-text">Remember to remove any sentive data before uploading!</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Microsoft ID</label>
+                                <input id="username" type="text" class="form-control" aria-describedby="unamehelp" placeholder="Email, phone or skype">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label">Sharedown login module</label>
+                                <select id="loginmodlist" class="form-select" aria-label="Login module"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row logfieldscont"><!--login module additional fields--></div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="retryonfail">
+                                <label class="form-check-label" for="retryonfail">Restart download on failure</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="keepbrowopen">
+                                <label class="form-check-label" for="keepbrowopen">Keep Chrome window open</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="form-text">
+                                Workaround for those cases where login session is lost on browser close event.<br><br>
+                                This will start Chrome once and never close its window.<br>
+                                It's up to the user to close the browser window once all donwloads are complete.
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="keytar">
+                                <label class="form-check-label" for="keytar">Remember login credentials</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="form-text">
+                                This will store your credentials on save.<br><br>
+                                Save your Microsoft ID and login module credentials.<br>
+                                Your system password manager will be used.<br>
+                                Linux users require a properly configured password manager.
+                            </p>
+                        </div>
+                        <div class="col-6 offset-6">
+                            <button id="delcreds" type="button" class="btn bg-sharepoint1 float-end">Forget login credentials</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="chuserdata">
+                                <label class="form-check-label" for="chuserdata">Enable Chrome userdata folder</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="form-text">
+                                This lets you save your login session.<br>
+                                Login module is ignored when this is set.<br>
+                                You will be prompted to login again when the session expires.<br><br>
+                                <i>All data will be deleted on application exit.</i>
+                            </p>
+                        </div>
+                        <div class="col-6 offset-6">
+                            <button id="delchdfold" type="button" class="btn bg-sharepoint1 float-end">Delete data folder</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="autosavestate">
+                                <label class="form-check-label" for="autosavestate">Automatically save Sharedown state</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="form-text">Save Sharedown download queue, global settings and per-video settings.</p>
+                        </div>
+                        <div class="col-6 offset-6">
+                            <button id="mexportstate" type="button" class="btn bg-sharepoint1 float-end">Save Sharedown state</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer mt-3">
+                    <span id="gsett-succ-str" class="text-success d-none"><i class="fa-solid fa-check"></i> Saved</span>
+                    <button id="gsett-save" type="button" class="btn bg-sharepoint1">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loadingscr" class="text-center">
+        <div class="spinner-border spinner-5x text-warning" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <template id="videoitem">
+        <div class="videoitm mt-1 col-12">
+            <div class="input-group" data-video-id="">
+                <div id="shdprogbar" class="progress rounded-0 position-relative flex-fill bg-sharepoint3">
+                    <span class="progtext position-absolute text-truncate text-white fw-bold"></span>
+                    <div class="progress-bar rounded-0 bg-sharepoint4" role="progressbar" data-tmp-perc="0"></div>
+                </div>
+                <button type="button" class="copy-btn btn btn-outline-primary" title="Copy video URL"><i class="fa-solid fa-copy"></i></button>
+                <button type="button" class="vsett-btn btn btn-outline-secondary" title="Sharedown video options"><i class="fa-solid fa-gear"></i></button>
+                <button type="button" class="deque-btn btn btn-outline-danger" title="Remove video from download queue"><i class="fa-solid fa-times"></i></button>
+            </div>
+        </div>
+    </template>
+
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="messageBoxType.js"></script>
+    <script src="timeoutMessage.js"></script>
+    <script src="video.js"></script>
+    <script src="downloadQue.js"></script>
+    <script src="utils.js"></script>
+    <script src="uiUtils.js"></script>
+    <script src="sharedown.js"></script>
+</body>
+</html>
